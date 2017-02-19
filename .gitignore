@@ -22,3 +22,5 @@ _testmain.go
 *.test
 
 .vagrant
+npm-debug.log
+econfig

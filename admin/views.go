@@ -1,21 +1,26 @@
 package admin
 
 import (
+	"bytes"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/kataras/iris"
-	"github.com/kelseyhightower/confd/log"
 )
 
 type View struct {
+	WebServer *WebServer
 }
 
 func (v *View) Execute(ctx *iris.Context) {
 }
 
 func (v *View) WebSocketHandle(c iris.WebsocketConnection) {
-
 	log.Debug("client connet now! ID: %s", c.ID())
 	c.Join("confd")
 	c.On("log", func(message string) {
@@ -34,18 +39,36 @@ func (v *View) WebSocketHandle(c iris.WebsocketConnection) {
 	c.OnDisconnect(func() {
 		log.Debug("Connection with ID: %s has been disconnected!", c.ID())
 	})
-	go func() {
-		lq := log.GetLogQueue()
-		for {
-			logMessage := lq.GetLatest()
-			if logMessage != "" {
-				c.To("confd").Emit("log", logMessage)
-			}
-		}
-	}()
-
 }
 
+func (v *View) ServeStatic(ctx *iris.Context) {
+	path := ctx.PathString()
+	log.Debug("service path:" + path)
+
+	if path == "/" || (!strings.Contains(path, ".js") && !strings.Contains(path, ".css") && !strings.Contains(path, ".png") && !strings.Contains(path, ".icon") && !strings.Contains(path, ".gif") && !strings.Contains(path, ".ttf") && !strings.Contains(path, ".woff")) {
+		path = "index.html"
+	}
+
+	path = filepath.Join("web/dist/", path)
+	path = strings.Replace(path, "/", string(os.PathSeparator), -1)
+	path = strings.TrimPrefix(path, "/")
+	if uri, err := url.Parse(path); err == nil {
+		path = uri.Path
+	} else {
+		ctx.Text(iris.StatusInternalServerError, err.Error())
+		return
+	}
+
+	log.Debug("static path:" + path)
+	data, err := Asset(path)
+	if err != nil {
+		log.Error(err.Error())
+		ctx.NotFound()
+		return
+	}
+
+	ctx.ServeContent(bytes.NewReader(data), path, time.Now(), true)
+}
 func (v *View) Home(ctx *iris.Context) {
 	ctx.WriteString("hello")
 }

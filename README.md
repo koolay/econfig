@@ -19,3 +19,9 @@ hi-config
 - 配置项完整性检查
 - 友好的web界面体验
 
+
+## setup
+
+- test
+
+`go test $(go list ./... | grep -v /vendor/)`

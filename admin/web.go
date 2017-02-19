@@ -66,14 +66,6 @@ func (w *WebServer) Start() {
 	//login
 	app.Post("/api/login", view.Login)
 	app.Post("/api/exec", jwtMDW.Serve, view.Execute)
-	app.Get("/api/projects", jwtMDW.Serve, view.GetProjects)
-	app.Get("/api/project/:projectName", jwtMDW.Serve, view.GetProject)
-	app.Get("/api/project/:projectName/item/:key", jwtMDW.Serve, view.GetItem)
-	app.Delete("/api/project/:projectName/item/:key", jwtMDW.Serve, view.DeleteItem)
-	app.Get("/api/project/:projectName/items", jwtMDW.Serve, view.GetItems)
-	app.Post("/api/project/:projectName/items", jwtMDW.Serve, view.SetItem)
-	//tmpl
-	app.Get("/api/project/:projectName/tmpl/:filepath", jwtMDW.Serve, view.GetTemplates)
 	app.Websocket.OnConnection(view.WebSocketHandle)
 
 	app.Listen(fmt.Sprintf(":%d", w.setting.Port))

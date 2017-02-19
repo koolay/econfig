@@ -1,0 +1,36 @@
+[flags]
+store = "redis"
+
+[web]
+username = "admin"
+password = "123"
+
+[apps]
+[apps.myapp]
+description = "myapp"
+root = "/data/www/myapp"
+prefix = ""
+tmpl = ".env.tmpl"
+dist = ".env"
+cmd = "nginx -s reload"
+
+[apps.myapp2]
+description = "myapp2"
+root = "/data/www/myapp2"
+cmd = ""
+
+[store]
+[store.redis]
+host = "127.0.0.1"
+port = 6379
+db = 0
+password = ""
+
+[store.mysql]
+host = "127.0.0.1"
+port = 6379
+database = "econfig"
+username = "root"
+password = "dev"
+
+
