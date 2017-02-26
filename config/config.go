@@ -32,7 +32,10 @@ func init() {
 	viper.AddConfigPath("$HOME")    // adding home directory as first search path
 	viper.AddConfigPath(".")
 	viper.AutomaticEnv() // read in environment variables that match
-
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Println("Config file changed:", e.Name)
+	})
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())

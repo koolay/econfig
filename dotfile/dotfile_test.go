@@ -7,16 +7,31 @@ import (
 )
 
 func parseAndCompare(t *testing.T, rawEnvLine string, expectedKey string, expectedValue string) {
-	key, value, _ := parseLine(rawEnvLine)
-	if key != expectedKey || value != expectedValue {
-		t.Errorf("Expected '%v' to parse as '%v' => '%v', got '%v' => '%v' instead", rawEnvLine, expectedKey, expectedValue, key, value)
+	var configItem ConfigItem
+	parseLine(&configItem, rawEnvLine)
+	if configItem.Key != expectedKey || configItem.Value != expectedValue {
+		t.Errorf("Expected '%v' to parse as '%v' => '%v', got '%v' => '%v' instead", rawEnvLine, expectedKey, expectedValue, configItem.Key, configItem.Value)
 	}
 }
 
 func TestReadEnvFile(t *testing.T) {
 	filename, _ := filepath.Abs("../fixtrues/plain.env")
 	if kvMap, err := ReadEnvFile(filename); err == nil {
-		assert.Equal(t, kvMap["DB"], "abc")
+		assert.Equal(t, kvMap["DB"].Value, "db")
+		assert.Equal(t, kvMap["DB"].Key, "DB")
+		assert.Equal(t, kvMap["DB"].Comment, "dbCommentLine")
+
+		assert.Equal(t, kvMap["JWT_SECRET"].Value, "jwt_secret")
+		assert.Equal(t, kvMap["JWT_SECRET"].Key, "JWT_SECRET")
+		assert.Equal(t, kvMap["JWT_SECRET"].Comment, "")
+
+		assert.Equal(t, kvMap["JWT_TIMEOUT"].Value, 1024)
+
+		assert.Equal(t, kvMap["APP_KEY"].Value, "app_key")
+		assert.Equal(t, kvMap["APP_KEY"].Key, "APP_KEY")
+		assert.Equal(t, kvMap["APP_KEY"].Comment, "appkeyCommentLine")
+
+		assert.Equal(t, kvMap["DOMAIN"].Value, "")
 	} else {
 		t.Error(err.Error())
 	}
@@ -81,11 +96,32 @@ func TestParsing(t *testing.T) {
 	// it 'throws an error if line format is incorrect' do
 	// expect{env('lol$wut')}.to raise_error(Dotenv::FormatError)
 	badlyFormattedLine := "lol$wut"
-	_, _, err := parseLine(badlyFormattedLine)
+	var configItem ConfigItem
+	err := parseLine(&configItem, badlyFormattedLine)
 	if err == nil {
 		t.Errorf("Expected \"%v\" to return error, but it didn't", badlyFormattedLine)
 	}
 }
+
+func TestIsCommentLine(t *testing.T) {
+	if isCommentLine("") {
+		t.Error("Line with nothing so not a comment line")
+	}
+
+	if !isCommentLine("# ato a") {
+		t.Error("Line should be a comment line")
+	}
+
+	if !isCommentLine("\t# ato a") {
+		t.Error(`\t Line should be a comment line`)
+	}
+
+	if isCommentLine("\n") {
+		t.Error(`\n should not be a comment line`)
+	}
+
+}
+
 func TestIsIgnoredLine(t *testing.T) {
 	if !isIgnoredLine("\n") {
 		t.Error("Line with nothing but line break wasn't ignored")
@@ -97,11 +133,11 @@ func TestIsIgnoredLine(t *testing.T) {
 
 	// it 'ignores comment lines' do
 	// expect(env("\n\n\n # HERE GOES FOO \nfoo=bar")).to eql('foo' => 'bar')
-	if !isIgnoredLine("# comment") {
-		t.Error("Comment wasn't ignored")
+	if isIgnoredLine("# comment") {
+		t.Error("Comment should not be ignored")
 	}
 
-	if !isIgnoredLine("\t#comment") {
+	if isIgnoredLine("\t#comment") {
 		t.Error("Indented comment wasn't ignored")
 	}
 

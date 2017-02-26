@@ -56,6 +56,8 @@ func init() {
 
 	RootCmd.PersistentFlags().StringVar(&config.FlagValues.CfgFile, "config", "c", "config file (default is $HOME/.econfig.toml)")
 	RootCmd.PersistentFlags().StringVar(&config.FlagValues.App, "app", "p", "process special app")
+	RootCmd.PersistentFlags().StringVar(&config.FlagValues.Store, "store", "s", "data type")
+
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")

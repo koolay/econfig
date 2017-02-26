@@ -25,3 +25,11 @@ hi-config
 - test
 
 `go test $(go list ./... | grep -v /vendor/)`
+
+## 运行
+
+- serve
+
+`econfig serve --config /etc/econfig/.econfig.toml --app myapp`
+
+
