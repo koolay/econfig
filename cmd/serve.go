@@ -16,11 +16,12 @@ package cmd
 
 import (
 	"fmt"
-
+	"github.com/koolay/econfig/config"
 	"github.com/spf13/cobra"
+	// jww "github.com/spf13/jwalterweatherman"
 )
 
-// serveCmd represents the serve command
+// ServeCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "A brief description of your command",
@@ -32,13 +33,14 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
+		fmt.Printf("from serve app: %v \n", config.GlobalFlags.App)
+		fmt.Printf("from serve verbose: %v \n", config.GlobalFlags.Verbose)
 		fmt.Println("serve called")
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(serveCmd)
-
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
@@ -48,5 +50,4 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// serveCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 }

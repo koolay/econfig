@@ -20,12 +20,11 @@ import (
 
 	"github.com/koolay/econfig/config"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "newAppName",
+	Use:   "econfig",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
@@ -33,6 +32,8 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
@@ -49,25 +50,18 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(preInit)
+	RootCmd.PersistentFlags().StringVarP(&config.GlobalFlags.CfgFile, "config", "c", "", "config file (default is $HOME/.econfig.toml)")
+	RootCmd.PersistentFlags().StringVarP(&config.GlobalFlags.App, "app", "p", "", "process special app")
+	RootCmd.PersistentFlags().StringVarP(&config.GlobalFlags.Store, "store", "s", "mysql", "data type, supports: mysql, redis,vault")
+	RootCmd.PersistentFlags().BoolVarP(&config.GlobalFlags.Verbose, "verbose", "v", false, "log verbose mode")
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports Persistent Flags, which, if defined here,
-	// will be global for your application.
-
-	RootCmd.PersistentFlags().StringVar(&config.FlagValues.CfgFile, "config", "c", "config file (default is $HOME/.econfig.toml)")
-	RootCmd.PersistentFlags().StringVar(&config.FlagValues.App, "app", "p", "process special app")
-	RootCmd.PersistentFlags().StringVar(&config.FlagValues.Store, "store", "s", "data type")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	apps := viper.Get("apps").(map[string]interface{})
-	for appName, appProps := range apps {
-		fmt.Println("app:", appName, appProps)
-	}
+	// apps := viper.Get("apps").(map[string]interface{})
+	// for appName, appProps := range apps {
+	// fmt.Println("app:", appName, appProps)
+	// }
 }
 
 // initConfig reads in config file and ENV variables if set.
 func preInit() {
-	viper.BindPFlag("flags.store", RootCmd.Flags().Lookup("store"))
+
 }

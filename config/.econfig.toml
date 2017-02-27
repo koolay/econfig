@@ -1,5 +1,7 @@
 [flags]
-store = "redis"
+store = "mysql"
+verbose = false
+
 
 [web]
 username = "admin"

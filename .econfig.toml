@@ -1,5 +1,6 @@
 [flags]
 store = "redis"
+verbose = false
 
 [web]
 username = "admin"
@@ -32,5 +33,3 @@ port = 6379
 database = "econfig"
 username = "root"
 password = "dev"
-
-
