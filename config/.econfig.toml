@@ -1,6 +1,6 @@
 [flags]
 store = "mysql"
-verbose = false
+verbose = true
 
 
 [web]

@@ -15,28 +15,22 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/koolay/econfig/app"
 	"github.com/koolay/econfig/context"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-// ServeCmd represents the serve command
-var serveCmd = &cobra.Command{
-	Use:   "serve",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+// syncCmd represents the sync command
+var syncCmd = &cobra.Command{
+	Use:   "sync",
+	Short: "update config from store immediately",
+	Long:  `Update or generate the config file from store immediately.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		context.Logger.INFO.Println(viper.Get("apps.myapp"))
-		context.Logger.INFO.Println("serve called")
 		if gen, err := app.NewGenerator(); err == nil {
-			gen.SyncLoop(context.Flags.Serve.Interval)
-
+			fmt.Println("sync process")
+			gen.Sync()
 		} else {
 			context.Logger.FATAL.Panic(err)
 		}
@@ -44,5 +38,5 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	EConfigCmd.AddCommand(serveCmd)
+	EConfigCmd.AddCommand(syncCmd)
 }

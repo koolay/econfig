@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
@@ -40,4 +43,25 @@ func GetApps() []*App {
 		appList = append(appList, app)
 	}
 	return appList
+}
+
+func LoadConfig(gf *GlobalFlag) {
+	viper.SetConfigType("toml")
+	if gf.CfgFile != "" {
+		viper.SetConfigFile(gf.CfgFile)
+	}
+
+	viper.SetConfigName(".econfig") // name of config file (without extension)
+	viper.AddConfigPath("$HOME")    // adding home directory as first search path
+	viper.AddConfigPath(".")
+	viper.AutomaticEnv() // read in environment variables that match
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Println("Config file changed:", e.Name)
+	})
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	} else {
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
 }

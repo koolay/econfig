@@ -16,6 +16,11 @@ type ConfigItem struct {
 	Comment string
 }
 
+func GenerateEnvFile(configItemMap map[string]*ConfigItem, saveTo string) ([]byte, error) {
+	// linesMap := make(map[string]*ConfigItem)
+	return nil, nil
+}
+
 // ReadEnvFile read .env file
 func ReadEnvFile(filepath string) (map[string]*ConfigItem, error) {
 	file, err := os.Open(filepath)

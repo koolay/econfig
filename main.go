@@ -15,9 +15,36 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"os"
+	"strings"
+
 	"github.com/koolay/econfig/cmd"
+	"github.com/koolay/econfig/config"
+	"github.com/koolay/econfig/context"
+	"github.com/spf13/pflag"
 )
 
+// WordSepNormalizeFunc changes all flags that contain "_" separators
+func wordSepNormalizeFunc(f *pflag.FlagSet, name string) pflag.NormalizedName {
+	if strings.Contains(name, "_") {
+		return pflag.NormalizedName(strings.Replace(name, "_", "-", -1))
+	}
+	return pflag.NormalizedName(name)
+}
+
 func main() {
-	cmd.Execute()
+	pflag.CommandLine.SetNormalizeFunc(wordSepNormalizeFunc)
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	context.Flags.Global = config.NewGlobalFlag(pflag.CommandLine)
+	context.Flags.Serve = config.NewServeFlag(pflag.CommandLine)
+	pflag.Parse()
+	config.LoadConfig(context.Flags.Global)
+	context.Logger = config.NewLogger(context.Flags.Global)
+
+	if err := cmd.EConfigCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
 }
