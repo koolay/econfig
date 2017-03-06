@@ -3,6 +3,7 @@ package dotfile
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"regexp"
 	// "github.com/koolay/econfig/config"
 	"os"
@@ -94,11 +95,6 @@ func parseLine(item *ConfigItem, line string) (err error) {
 	splitString := strings.SplitN(line, "=", 2)
 
 	if len(splitString) != 2 {
-		// try yaml mode!
-		splitString = strings.SplitN(line, ":", 2)
-	}
-
-	if len(splitString) != 2 {
 		err = errors.New("Can't separate key from value")
 		return
 	}
@@ -144,7 +140,22 @@ func isIgnoredLine(line string) bool {
 	return len(trimmedLine) == 0
 }
 
-// func ReadAppEnv(app config.App) (error, map[string]interface{}) {
-// filepath := fmt.Sprintf("%s%s", app.Root, app.Tmpl)
-//
-// }
+func WriteLines(lines []string, path string, uid int, gid int) error {
+	file, err := os.Create(path)
+
+	if err != nil {
+		return err
+	}
+
+	if err := os.Chown(path, uid, gid); err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	w := bufio.NewWriter(file)
+	for _, line := range lines {
+		fmt.Fprintln(w, line)
+	}
+	return w.Flush()
+}

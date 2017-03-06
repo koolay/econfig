@@ -14,8 +14,9 @@ type App struct {
 	Root        string // root path of app
 	Prefix      string // prefix key of key
 	Tmpl        string // .env.tmpl
-	Dist        string // .env
+	Dest        string // .env
 	Cmd         string // Cmd "nginx -s reload"
+	Owner       string // who owner the dist file
 }
 
 func valueOfMap(key string, m map[string]interface{}, defaultValue string) string {
@@ -37,7 +38,7 @@ func GetApps() []*App {
 			Root:        valueOfMap("root", appPropsMap, ""),
 			Prefix:      valueOfMap("prefix", appPropsMap, ""),
 			Tmpl:        valueOfMap("tmpl", appPropsMap, ".env.tmpl"),
-			Dist:        valueOfMap("dist", appPropsMap, ".env"),
+			Dest:        valueOfMap("dest", appPropsMap, ".env"),
 			Cmd:         valueOfMap("cmd", appPropsMap, ""),
 		}
 		appList = append(appList, app)

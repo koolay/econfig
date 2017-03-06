@@ -12,7 +12,7 @@ description = "myapp"
 root = "/Users/huwl/myapp"
 prefix = "myapp"
 tmpl = ".env.example"
-dist = ".env"
+dest = ".env"
 cmd = "nginx -s reload"
 
 [apps.myapp2]

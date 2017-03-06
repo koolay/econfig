@@ -21,7 +21,7 @@ description = "myapp"
 root = "/data/www/myapp"
 prefix = ""
 tmpl = ".env.example"
-dist = ".env.dist"
+dest = ".env.dest"
 cmd = "nginx -s reload"
 
 [apps.myapp2]
@@ -49,5 +49,5 @@ func TestGetApps(t *testing.T) {
 	assert.Equal(t, len(apps), 2)
 	assert.Contains(t, []string{"myapp", "myapp2"}, apps[0].Name, "failed contains name")
 	assert.Contains(t, []string{".env.tmpl", ".env.example"}, apps[0].Tmpl, "failed contains tmpl")
-	assert.Contains(t, []string{".env", ".env.dist"}, apps[0].Dist, "faild contains dist")
+	assert.Contains(t, []string{".env", ".env.dest"}, apps[0].Dest, "faild contains dest")
 }
