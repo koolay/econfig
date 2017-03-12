@@ -15,13 +15,19 @@ import (
 	"github.com/koolay/econfig/store"
 )
 
-type Generator struct {
-	mu sync.Mutex
-	wg sync.WaitGroup
+type GeneratorConfig struct {
+	Interval time.Duration
 }
 
-func NewGenerator() (*Generator, error) {
+type Generator struct {
+	config *GeneratorConfig
+	mu     sync.Mutex
+	wg     sync.WaitGroup
+}
+
+func NewGenerator(config *GeneratorConfig) (*Generator, error) {
 	gen := &Generator{}
+	gen.config = config
 	return gen, nil
 }
 
@@ -98,8 +104,8 @@ func (gen *Generator) Sync() {
 	context.Logger.INFO.Println("complete")
 }
 
-func (gen *Generator) SyncLoop(interval time.Duration) {
-	t := time.NewTicker(interval)
+func (gen *Generator) SyncLoop() {
+	t := time.NewTicker(gen.config.Interval)
 	defer t.Stop()
 	for {
 		<-t.C

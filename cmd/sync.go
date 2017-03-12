@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/koolay/econfig/app"
+	"github.com/koolay/econfig/config"
 	"github.com/koolay/econfig/context"
 	"github.com/spf13/cobra"
 )
@@ -28,7 +29,9 @@ var syncCmd = &cobra.Command{
 	Short: "update config from store immediately",
 	Long:  `Update or generate the config file from store immediately.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if gen, err := app.NewGenerator(); err == nil {
+		context.Logger = config.NewLogger(context.Flags.Global)
+		cfg := &app.GeneratorConfig{}
+		if gen, err := app.NewGenerator(cfg); err == nil {
 			fmt.Println("sync process")
 			gen.Sync()
 		} else {

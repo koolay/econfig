@@ -37,8 +37,6 @@ to quickly create a Cobra application.`,
 	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
-// Execute adds all child commands to the root command sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := EConfigCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -48,11 +46,6 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(preInit)
-
-	// apps := viper.Get("apps").(map[string]interface{})
-	// for appName, appProps := range apps {
-	// fmt.Println("app:", appName, appProps)
-	// }
 }
 
 // initConfig reads in config file and ENV variables if set.

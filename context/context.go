@@ -8,7 +8,6 @@ import (
 // FlagsType flags
 type FlagsType struct {
 	Global *config.GlobalFlag
-	Serve  *config.ServeFlag
 }
 
 // Flags collection of flag
