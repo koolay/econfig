@@ -21,18 +21,16 @@ description = "myapp2"
 root = "/data/www/myapp2"
 cmd = ""
 
-[store]
-[store.redis]
+[backends]
+[backends.redis]
 host = "127.0.0.1"
 port = 6379
 db = 0
 password = ""
 
-[store.mysql]
-host = "127.0.0.1"
-port = 6379
-database = "econfig"
-username = "root"
-password = "dev"
+[backends.postgres]
+dsn="postgres://root:dev@localhost:5432/econfig?sslmode=disable"
 
+[backends.mysql]
+dsn="root:dev@tcp(localhost:3306)/econfig"
 

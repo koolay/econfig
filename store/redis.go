@@ -20,8 +20,8 @@ type redisStorage struct {
 	DB int
 }
 
-func newRedisStorage(addr string, password string, db int) *redisStorage {
-	return &redisStorage{Addr: addr, Password: password, DB: db}
+func newRedisStorage(addr string, password string, db int) (*redisStorage, error) {
+	return &redisStorage{Addr: addr, Password: password, DB: db}, nil
 }
 
 func (rs *redisStorage) connect() *redis.Client {

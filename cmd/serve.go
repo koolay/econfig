@@ -26,30 +26,27 @@ import (
 	"github.com/spf13/viper"
 )
 
-var flag *config.ServeFlag
+var serveFlag *config.ServeFlag
 
 // ServeCmd represents the serve command
 var ServeCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Run as a serve",
+	Long:  `Run as a serve`,
 	Run: func(cmd *cobra.Command, args []string) {
 		context.Logger = config.NewLogger(context.Flags.Global)
 		context.Logger.INFO.Println(viper.Get("apps.myapp"))
 		context.Logger.INFO.Println("serve called")
-		cfg := &app.GeneratorConfig{Interval: flag.Interval}
+		cfg := &app.GeneratorConfig{Interval: serveFlag.Interval}
 		serveCfg := &app.ServeConfig{}
-		serveCfg.Bind = flag.Bind
-		serveCfg.Advertise = flag.Advertise
-		serveCfg.HttpPort = flag.HttpPort
-		serveCfg.Interval = flag.Interval
-		serveCfg.Join = flag.Join
-		serveCfg.Node = flag.Node
+		serveCfg.Bind = serveFlag.Bind
+		serveCfg.Advertise = serveFlag.Advertise
+		serveCfg.RPCAddr = serveFlag.RPCAddr
+		serveCfg.RPCAuth = serveFlag.RPCAuth
+		serveCfg.HttpPort = serveFlag.HttpPort
+		serveCfg.Interval = serveFlag.Interval
+		serveCfg.Join = serveFlag.Join
+		serveCfg.Node = serveFlag.Node
 		if serveCfg.Node == "" {
 			hostname, err := os.Hostname()
 			if err != nil {
@@ -70,6 +67,22 @@ to quickly create a Cobra application.`,
 		if err := c.StartCluster(); err != nil {
 			context.Logger.FATAL.Fatal(err)
 		}
+
+		// rpcClient, err := app.NewRPCClient(serveCfg.RPCAddr, serveCfg.RPCAuth)
+		// if err != nil {
+		// context.Logger.FATAL.Fatalf("Create RPC failed. %v", err)
+		// }
+		//
+		// go func() {
+		// for {
+		// context.Logger.INFO.Panicln("rpc call")
+		// err = rpcClient.UserEvent("debug", []byte("hi, rpc"), false)
+		// if err != nil {
+		// context.Logger.ERROR.Printf("rpc send failed. %v", err)
+		// }
+		// time.Sleep(5 * time.Second)
+		// }
+		// }()
 
 		signalChan := make(chan os.Signal, 1)
 		doneChan := make(chan bool)
@@ -92,5 +105,5 @@ to quickly create a Cobra application.`,
 
 func init() {
 	EConfigCmd.AddCommand(ServeCmd)
-	flag = config.NewServeFlag(ServeCmd.PersistentFlags())
+	serveFlag = config.NewServeFlag(ServeCmd.PersistentFlags())
 }
