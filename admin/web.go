@@ -16,10 +16,10 @@ type WebServer struct {
 }
 
 type Setting struct {
-	Port      int    `web port`
-	Username  string `admin username`
-	Password  string `admin password`
-	SecretKey string `jwt secretKey`
+	Port      int
+	Username  string
+	Password  string
+	SecretKey string
 }
 
 func New(templateConfig template.Config, config Setting) *WebServer {
