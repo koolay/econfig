@@ -7,12 +7,10 @@ import (
 	"github.com/iris-contrib/middleware/cors"
 	jwtmiddleware "github.com/iris-contrib/middleware/jwt"
 	"github.com/kataras/iris"
-	"github.com/kelseyhightower/confd/resource/template"
 )
 
 type WebServer struct {
-	templateConfig template.Config
-	setting        Setting
+	setting Setting
 }
 
 type Setting struct {
@@ -22,10 +20,9 @@ type Setting struct {
 	SecretKey string
 }
 
-func New(templateConfig template.Config, config Setting) *WebServer {
+func New(config Setting) *WebServer {
 	return &WebServer{
-		templateConfig: templateConfig,
-		setting:        config,
+		setting: config,
 	}
 
 }
@@ -64,8 +61,10 @@ func (w *WebServer) Start() {
 	app.Get("/view/*file", view.ServeStatic)
 
 	//login
+	app.Get("/home", view.Home)
 	app.Post("/api/login", view.Login)
 	app.Post("/api/exec", jwtMDW.Serve, view.Execute)
+	app.Get("/api/projects", view.GetProjects)
 	app.Websocket.OnConnection(view.WebSocketHandle)
 
 	app.Listen(fmt.Sprintf(":%d", w.setting.Port))

@@ -19,6 +19,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/koolay/econfig/admin"
 	"github.com/koolay/econfig/app"
 	"github.com/koolay/econfig/config"
 	"github.com/koolay/econfig/context"
@@ -26,7 +27,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-var serveFlag *config.ServeFlag
+var (
+	serveFlag *config.ServeFlag
+)
 
 // ServeCmd represents the serve command
 var ServeCmd = &cobra.Command{
@@ -37,7 +40,7 @@ var ServeCmd = &cobra.Command{
 		context.Logger = config.NewLogger(context.Flags.Global)
 		context.Logger.INFO.Println(viper.Get("apps.myapp"))
 		context.Logger.INFO.Println("serve called")
-		cfg := &app.GeneratorConfig{Interval: serveFlag.Interval}
+
 		serveCfg := &app.ServeConfig{}
 		serveCfg.Bind = serveFlag.Bind
 		serveCfg.Advertise = serveFlag.Advertise
@@ -55,6 +58,7 @@ var ServeCmd = &cobra.Command{
 			serveCfg.Node = hostname
 		}
 
+		cfg := &app.GeneratorConfig{Interval: serveFlag.Interval}
 		if gen, err := app.NewGenerator(cfg); err == nil {
 			go func() {
 				gen.SyncLoop()
@@ -63,6 +67,14 @@ var ServeCmd = &cobra.Command{
 		} else {
 			context.Logger.FATAL.Panic(err)
 		}
+
+		webConfig := admin.Setting{Port: serveCfg.HttpPort, Username: "", Password: "", SecretKey: "$2@!!"}
+		ws := admin.New(webConfig)
+		go func() {
+			context.Logger.INFO.Printf("Start web server, listen: %d\n", serveCfg.HttpPort)
+			ws.Start()
+		}()
+
 		c := app.NewSerfClient(serveCfg)
 		if err := c.StartCluster(); err != nil {
 			context.Logger.FATAL.Fatal(err)
@@ -105,5 +117,5 @@ var ServeCmd = &cobra.Command{
 
 func init() {
 	EConfigCmd.AddCommand(ServeCmd)
-	serveFlag = config.NewServeFlag(ServeCmd.PersistentFlags())
+	serveFlag = config.NewServeFlag(ServeCmd.Flags())
 }

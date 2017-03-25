@@ -69,6 +69,12 @@ func (v *View) ServeStatic(ctx *iris.Context) {
 
 	ctx.ServeContent(bytes.NewReader(data), path, time.Now(), true)
 }
+
+func (v *View) GetProjects(ctx *iris.Context) {
+	projects := map[string]string{"a": "1312"}
+	ctx.JSON(200, projects)
+}
+
 func (v *View) Home(ctx *iris.Context) {
 	ctx.WriteString("hello")
 }
