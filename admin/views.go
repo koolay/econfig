@@ -11,6 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/kataras/iris"
+	"github.com/koolay/econfig/config"
 )
 
 type View struct {
@@ -71,8 +72,8 @@ func (v *View) ServeStatic(ctx *iris.Context) {
 }
 
 func (v *View) GetProjects(ctx *iris.Context) {
-	projects := map[string]string{"a": "1312"}
-	ctx.JSON(200, projects)
+	apps := config.GetApps()
+	ctx.JSON(200, apps)
 }
 
 func (v *View) Home(ctx *iris.Context) {
