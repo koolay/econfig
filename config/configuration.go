@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -23,6 +24,23 @@ type App struct {
 	Dest        string // .env
 	Cmd         string // Cmd "nginx -s reload"
 	Owner       string // who owner the dist file
+}
+
+func (app *App) GetTmplPath() string {
+	return path.Join(app.Root, app.Tmpl)
+}
+
+func (app *App) GetDestPath() string {
+	return path.Join(app.Root, app.Dest)
+}
+
+func (app *App) GenerateStoreKey(key string) string {
+	key = strings.TrimSpace(key)
+	if len(app.Prefix) > 0 {
+		return strings.ToUpper(fmt.Sprintf("%s_%s", app.Prefix, key))
+	} else {
+		return strings.ToUpper(key)
+	}
 }
 
 func ValueOfMap(key string, m map[string]interface{}, defaultValue string) string {
@@ -46,6 +64,18 @@ func GetBackends(backend string) (map[string]interface{}, error) {
 		}
 	}
 	return nil, errors.New("not found configuration of the backend:" + backend)
+}
+
+func GetApp(name string) *App {
+	if name == "" {
+		return nil
+	}
+	for _, app := range GetApps() {
+		if app.Name == name {
+			return app
+		}
+	}
+	return nil
 }
 
 // GetApps get app config from .econfig

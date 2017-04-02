@@ -1,55 +1,19 @@
 <template>
     <div>
-    <v-card>
+    <v-card v-for="(app, index) in apps" :key="app.Name">
       <v-card-row class="green darken-1">
         <v-card-title>
-          <span class="white--text">Marriot Rewards</span>
+            <span class="white--text">{{ app.Name }}</span>
         </v-card-title>
       </v-card-row>
       <v-card-text>
         <v-card-row height="75px">
           <div>
-            <div>Membership Number</div><strong>113241423</strong>
           </div>
         </v-card-row>
       </v-card-text>
       <v-card-row actions>
-        <v-btn flat class="green--text darken-1">View Email</v-btn>
-      </v-card-row>
-    </v-card>
-
-    <v-card>
-      <v-card-row class="green darken-1">
-        <v-card-title>
-          <span class="white--text">Marriot Rewards</span>
-        </v-card-title>
-      </v-card-row>
-      <v-card-text>
-        <v-card-row height="75px">
-          <div>
-            <div>Membership Number</div><strong>113241423</strong>
-          </div>
-        </v-card-row>
-      </v-card-text>
-      <v-card-row actions>
-        <v-btn flat class="green--text darken-1">View Email</v-btn>
-      </v-card-row>
-    </v-card>
-    <v-card>
-      <v-card-row class="green darken-1">
-        <v-card-title>
-          <span class="white--text">Marriot Rewards</span>
-        </v-card-title>
-      </v-card-row>
-      <v-card-text>
-        <v-card-row height="75px">
-          <div>
-            <div>Membership Number</div><strong>113241423</strong>
-          </div>
-        </v-card-row>
-      </v-card-text>
-      <v-card-row actions>
-        <v-btn flat class="green--text darken-1">View Email</v-btn>
+        <v-btn flat class="green--text darken-1">Setting</v-btn>
       </v-card-row>
     </v-card>
     </div>
@@ -58,13 +22,13 @@
 <script>
 
     import config from '../config'
-    import project from '../store/project'
+    import app from '../store/app'
 
     export default {
         data () {
             return {
                 itemGroup: config.menu,
-                projects: []
+                apps: []
             }
         },
         created () {
@@ -73,8 +37,9 @@
 
         methods: {
             bindProjects () {
-                project.list(function (data) {
-                    this.projects = data
+                let my = this
+                app.list(function (response) {
+                    my.apps = response.data
                 })
             }
         }

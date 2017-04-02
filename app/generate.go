@@ -3,9 +3,7 @@ package app
 
 import (
 	"fmt"
-	"path"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 
@@ -31,15 +29,6 @@ func NewGenerator(config *GeneratorConfig) (*Generator, error) {
 	return gen, nil
 }
 
-func (gen *Generator) processKey(prefix string, key string) string {
-	key = strings.TrimSpace(key)
-	if len(prefix) > 0 {
-		return strings.ToUpper(fmt.Sprintf("%s_%s", prefix, key))
-	} else {
-		return strings.ToUpper(key)
-	}
-}
-
 func (gen *Generator) Sync() {
 	gen.mu.Lock()
 	defer gen.mu.Unlock()
@@ -53,8 +42,8 @@ func (gen *Generator) Sync() {
 				context.Logger.INFO.Printf("sync app: %s completed \n", app.Name)
 			}()
 			context.Logger.INFO.Println("start sync app:", app.Name)
-			tmplFilePath := path.Join(app.Root, app.Tmpl)
-			destFilePath := path.Join(app.Root, app.Dest)
+			tmplFilePath := app.GetTmplPath()
+			destFilePath := app.GetDestPath()
 			// load apps
 			context.Logger.INFO.Printf("sync app: %s, tmpfile: %s \n", app.Name, tmplFilePath)
 			context.Logger.INFO.Printf("sync app: %s, destfile: %s \n", app.Name, destFilePath)
@@ -63,12 +52,13 @@ func (gen *Generator) Sync() {
 				var originalKeys sort.StringSlice
 				for k, _ := range tmplMap {
 					originalKeys = append(originalKeys, k)
-					keys = append(keys, gen.processKey(app.Prefix, k))
+					keys = append(keys, app.GenerateStoreKey(k))
 				}
 				originalKeys.Sort()
 				storage, err := store.NewStorage(context.Flags.Global.Backend)
 				if err != nil {
-					context.Logger.FATAL.Panic(err)
+					context.Logger.ERROR.Println(err.Error())
+					return
 				}
 				if valueMap, err := storage.GetItems(keys); err == nil {
 					var lines []string
@@ -79,7 +69,7 @@ func (gen *Generator) Sync() {
 						if tmpItem.Comment != "" {
 							lines = append(lines, "#"+tmpItem.Comment)
 						}
-						storeKey := gen.processKey(app.Prefix, k)
+						storeKey := app.GenerateStoreKey(k)
 						if val, ok := valueMap[storeKey]; ok {
 							lines = append(lines, fmt.Sprintf("%s=%v", k, val))
 						} else {

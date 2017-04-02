@@ -22,6 +22,17 @@ func GenerateEnvFile(configItemMap map[string]*ConfigItem, saveTo string) ([]byt
 	return nil, nil
 }
 
+func GetConfigItemFromEnvFile(filepath string, key string) (*ConfigItem, error) {
+	if items, err := ReadEnvFile(filepath); err == nil {
+		if item, ok := items[key]; ok {
+			return item, nil
+		}
+		return nil, nil
+	} else {
+		return nil, err
+	}
+}
+
 // ReadEnvFile read .env file
 func ReadEnvFile(filepath string) (map[string]*ConfigItem, error) {
 	file, err := os.Open(filepath)
