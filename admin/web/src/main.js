@@ -4,17 +4,17 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import Resource from 'vue-resource'
-import Vuetify from 'vuetify'
+import iView from 'iview'
 import NProgress from 'nprogress'
 import ls from './services/ls'
 // import config from './config'
 
-import '../node_modules/vuetify/dist/vuetify.min.css'
+import 'iview/dist/styles/iview.css'
 import 'nprogress/nprogress.css'
 
 Vue.config.productionTip = false
 Vue.use(Resource)
-Vue.use(Vuetify)
+Vue.use(iView)
 
 Vue.http.interceptors.push((request, next) => {
     const token = ls.get('token')

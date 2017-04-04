@@ -13,8 +13,8 @@ export default {
         })
     },
 
-    get: function (projectId, successCb, errorCb) {
-        const apiUrl = `/api/app/${projectId}`
+    get: function (appName, successCb, errorCb) {
+        const apiUrl = `/api/app/${appName}`
         http.get(apiUrl, data => {
             successCb(data)
         })
