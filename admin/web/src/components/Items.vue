@@ -1,7 +1,10 @@
 <template>
     <div>
-        <h2 style="margin: 10px">Configuration Items</h2>
-        <Collapse style="margin-bottom: 20px;">
+        <Breadcrumb style="margin-top: 10px;">
+            <Breadcrumb-item href="/dashboard">Dashboard</Breadcrumb-item>
+            <Breadcrumb-item>{{ appName }}</Breadcrumb-item>
+        </Breadcrumb>
+        <Collapse style="margin-bottom: 20px; margin-top: 10px;">
             <Panel name="1">
                 Setter
                 <div slot="content">
@@ -51,8 +54,7 @@
                 </div>
             </Panel>
         </Collapse>
-
-        <h2 style="margin-bottom: 10px;">miss:<span style="color:red">{{ miss }}</span>/{{ total }}</h2>
+        <h3 style="margin-bottom: 10px;">missing configuration item:<span style="color:red">&nbsp;{{ miss }}</span></h3>
         <Table border :context="self" :columns="table.columns" :data="table.data" @on-row-click="handleRowClick"></Table>
     </div>
 </template>
@@ -167,6 +169,7 @@ export default {
                 }
                 my.storeItemsMap[key] = value
                 my.selectedItem.StoreValue = value
+                my.bindItems()
                 my.$Message.success('Successfully saved')
             })
         },

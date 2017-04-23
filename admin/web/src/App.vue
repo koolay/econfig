@@ -12,7 +12,7 @@
             <div class="clear"></div>
         </div>
         <div class="layout-copy">
-            2017-2020 &copy; econfig
+            2017-2020 &copy; <a href="https://github.com/koolay/econfig">econfig</a>
         </div>
     </div>
 </template>

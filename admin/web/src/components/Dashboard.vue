@@ -6,11 +6,11 @@
                 <Icon type="ios-film-outline"></Icon>
                 {{ app.Name}}
             </p>
-            <a href="#" style="margin-left: 10px;" slot="extra" @click.prevent="changeLimit">
+            <!-- <a href="#" style="margin-left: 10px;" slot="extra" @click.prevent="changeLimit">
                 <Tooltip content="modify" placement="top">
                     <Icon type="settings"></Icon>
                 </Tooltip>
-            </a>
+            </a> -->
 
             <router-link :to="{ name: 'items', params: { app: app.Name } }" style="margin-left: 10px;" slot="extra" @click.prevent="changeLimit">
                 <Tooltip content="settings" placement="top">
