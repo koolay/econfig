@@ -5,6 +5,7 @@ EConfig
 
 **.env.example** + **backend(redis/mysql/postgres/etcd/consul)** = **.env**
 
+
 ## 目标(Features)
 
 - 容易部署,最简单可以单文件运行. (也可以使用配置文件,管理多个项目)
@@ -36,6 +37,15 @@ EConfig
 - 立即执行(Run only once)
 
 `econfig sync -v --config /etc/econfig/.econfig.toml --backend postgres --app myapp`
+
+## 截图(Screenshot)
+
+![Alt text](/screenshot/econfig01.png?raw=true"Optional Title")
+
+![Alt text](/screenshot/econfig02.png?raw=true"Optional Title")
+
+![Alt text](/screenshot/econfig03.png?raw=true"Optional Title")
+
 
 ## Thanks
 
