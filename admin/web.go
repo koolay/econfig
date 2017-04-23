@@ -3,7 +3,9 @@ package admin
 import (
 	"fmt"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/iris-contrib/middleware/cors"
+	jwtmiddleware "github.com/iris-contrib/middleware/jwt"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/httprouter"
 	"gopkg.in/kataras/iris.v6/adaptors/websocket"
@@ -41,14 +43,15 @@ func (w *WebServer) Start() {
 	})
 
 	app.Use(crs)
-
-	//jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
-	//ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-	//return []byte(w.setting.SecretKey), nil
-	//},
-	//SigningMethod: jwt.SigningMethodHS256,
-	//})
-	//app.Use(jwtHandler)
+	jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
+		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+			return []byte(w.setting.SecretKey), nil
+		},
+		// When set, the middleware verifies that tokens are signed with the specific signing algorithm
+		// If the signing method is not constant the ValidationKeyGetter callback can be used to implement additional checks
+		// Important to avoid security issues described here: https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries/
+		SigningMethod: jwt.SigningMethodHS256,
+	})
 	ws := websocket.New(websocket.Config{
 		// the path which the websocket client should listen/registered to,
 		Endpoint: "/log",
@@ -75,9 +78,16 @@ func (w *WebServer) Start() {
 	})
 	app.Adapt(ws)
 	view := &View{WebServer: w}
-	registerRoutes(app, view)
-	ws.OnConnection(view.WebSocketHandle)
 
+	app.Get("/", view.ServeStatic)
+	app.Get("/static/*file", view.ServeStatic)
+	app.Get("/view/*file", view.ServeStatic)
+	app.Get("/home", view.Home)
+	app.Post("/api/login", view.Login)
+
+	api := app.Party("/api", jwtHandler.Serve)
+	registerAPIRoutes(api, view)
+	ws.OnConnection(view.WebSocketHandle)
 	app.Listen(fmt.Sprintf(":%d", w.setting.Port))
 	//iris.ListenTLSAuto(fmt.Sprintf(":%d", port))
 }

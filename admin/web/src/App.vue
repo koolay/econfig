@@ -1,9 +1,10 @@
 <template>
     <div class="layout">
         <div class="layout-ceiling">
+            <div class="layout-celling-title"><a href="/" target="_self">EConfig</a></div>
             <div class="layout-ceiling-main">
-                <a href="#">Sign in</a> |
-                <a href="#">Sign up</a>
+              <a v-if="loggedIn" @click="signOut()">Sign out</a>
+              <router-link v-if="!loggedIn" to="/login">Sign in</router-link>
             </div>
         </div>
         <div style="height: auto!important; min-height: 200px;">
@@ -17,12 +18,26 @@
 </template>
 
 <script>
-    export default {
-        data () {
-            return {
-            }
+import auth from './services/auth'
+export default {
+    data () {
+        return {
+            loggedIn: auth.loggedIn()
+        }
+    },
+    created () {
+        auth.onChange = loggedIn => {
+            this.loggedIn = loggedIn
+        }
+    },
+    methods: {
+        signOut: function () {
+            auth.logout()
+            this.$Message.success('Sign out')
+            this.$router.push('/login')
         }
     }
+}
 </script>
 <style scoped>
     .layout{
@@ -58,6 +73,13 @@
         padding: 10px 0;
         overflow: hidden;
     }
+    .layout-celling-title {
+        float: left;
+        color: #fff;
+        font-size: 20px;
+        padding-left: 10px;
+    }
+    .layout-celling-title a, .layout-celling-title a:hover { color:#fff!important; }
     .layout-ceiling-main{
         float: right;
         margin-right: 15px;

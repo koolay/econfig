@@ -4,20 +4,13 @@ import (
 	"gopkg.in/kataras/iris.v6"
 )
 
-func registerRoutes(app *iris.Framework, view *View) {
-
-	app.Get("/", view.ServeStatic)
-	app.Get("/static/*file", view.ServeStatic)
-	app.Get("/view/*file", view.ServeStatic)
-
-	//login
-	app.Get("/home", view.Home)
-	app.Post("/api/login", view.Login)
-	app.Post("/api/exec", view.Execute)
-	app.Get("/api/apps", view.GetApps)
-	app.Get("/api/app/:app", view.GetApp)
-	app.Get("/api/app/:app/tmp-items", view.GetAllTmpItems)
-	app.Get("/api/app/:app/store-items", view.GetAllStoredItems)
-	app.Get("/api/app/:app/items", view.AllItems)
-	app.Get("/api/app/:app/item/:key", view.GetItem)
+func registerAPIRoutes(app *iris.Router, view *View) {
+	app.Get("/apps", view.GetApps)
+	app.Get("/app/:app", view.GetApp)
+	app.Post("/app/:app/sync", view.ExecuteSync)
+	app.Get("/app/:app/tmp-items", view.GetAllTmpItems)
+	app.Get("/app/:app/store-items", view.GetAllStoredItems)
+	app.Get("/app/:app/items", view.AllItems)
+	app.Get("/app/:app/item/:key", view.GetItem)
+	app.Put("/app/:app/item", view.SetItem)
 }

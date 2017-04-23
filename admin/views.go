@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/koolay/econfig/app"
 	"github.com/koolay/econfig/config"
 	"github.com/koolay/econfig/context"
 	"github.com/koolay/econfig/dotfile"
@@ -50,11 +50,8 @@ func (v *View) newStore() (store.Storage, error) {
 	return store.NewStorage(context.Flags.Global.Backend)
 }
 
-func (v *View) Execute(ctx *iris.Context) {
-}
-
 func (v *View) WebSocketHandle(c websocket.Connection) {
-	log.Debug("client connet now! ID: %s", c.ID())
+	context.Logger.INFO.Printf("client connet now! ID: %s \n", c.ID())
 	c.Join("confd")
 	c.On("log", func(message string) {
 		// to all except this connection ->
@@ -70,14 +67,12 @@ func (v *View) WebSocketHandle(c websocket.Connection) {
 	})
 
 	c.OnDisconnect(func() {
-		log.Debug("Connection with ID: %s has been disconnected!", c.ID())
+		context.Logger.INFO.Printf("Connection with ID: %s has been disconnected! \n", c.ID())
 	})
 }
 
 func (v *View) ServeStatic(ctx *iris.Context) {
 	path := ctx.Path()
-	log.Debug("service path:" + path)
-
 	if path == "/" || (!strings.Contains(path, ".js") && !strings.Contains(path, ".css") && !strings.Contains(path, ".png") && !strings.Contains(path, ".icon") && !strings.Contains(path, ".gif") && !strings.Contains(path, ".ttf") && !strings.Contains(path, ".woff")) {
 		path = "index.html"
 	}
@@ -91,11 +86,9 @@ func (v *View) ServeStatic(ctx *iris.Context) {
 		ctx.Text(iris.StatusInternalServerError, err.Error())
 		return
 	}
-
-	log.Debug("static path:" + path)
 	data, err := Asset(path)
 	if err != nil {
-		log.Error(err.Error())
+		context.Logger.ERROR.Println(err.Error())
 		ctx.NotFound()
 		return
 	}
@@ -125,8 +118,28 @@ func (v *View) GetItem(ctx *iris.Context) {
 	}
 }
 
+func (v *View) ExecuteSync(ctx *iris.Context) {
+	appName := ctx.PostValue("app")
+	appObj := config.GetApp(appName)
+	if appObj == nil {
+		v.sendJsonForError(ctx, 404, "app not exist")
+		return
+	}
+	cfg := &app.GeneratorConfig{}
+	gen, err := app.NewGenerator(cfg)
+	if err == nil {
+		appList := []*config.App{appObj}
+		gr, err := gen.Sync(appList)
+		if err == nil {
+			v.sendJson(ctx, gr.AppsMap[appName])
+			return
+		}
+	}
+	v.sendJsonForError(ctx, 500, err.Error())
+}
+
 func (v *View) SetItem(ctx *iris.Context) {
-	appName := ctx.Param("app")
+	appName := ctx.PostValue("app")
 	key := ctx.PostValue("key")
 	value := ctx.PostValue("value")
 	if key == "" {
@@ -193,13 +206,23 @@ func (v *View) GetAllStoredItems(ctx *iris.Context) {
 	storage, err := v.newStore()
 	if err == nil {
 		itemsMap, err := dotfile.ReadEnvFile(app.GetTmplPath())
-		var keys []string
+		var storeKeys []string
+		keyMap := make(map[string]interface{})
 		for key, _ := range itemsMap {
-			keys = append(keys, key)
+			storeKey := app.GenerateStoreKey(key)
+			keyMap[key] = storeKey
+			storeKeys = append(storeKeys, storeKey)
 		}
-		items, err := storage.GetItems(keys)
+		storeItemsMap, err := storage.GetItems(storeKeys)
 		if err == nil {
-			v.sendJson(ctx, items)
+			for key, storeKey := range keyMap {
+				if val, ok := storeItemsMap[storeKey.(string)]; ok {
+					keyMap[key] = val
+				} else {
+					delete(keyMap, key)
+				}
+			}
+			v.sendJson(ctx, keyMap)
 			return
 		}
 	} else {
@@ -232,11 +255,9 @@ type User struct {
 }
 
 func (v *View) Login(ctx *iris.Context) {
-
-	username := ctx.PostValue("username")
+	username := ctx.PostValue("account")
 	password := ctx.PostValue("password")
-	log.Debug(username + ", pwd:" + password)
-	log.Debug("config username:" + v.WebServer.setting.Username)
+	context.Logger.INFO.Printf("user: %s try to login", username)
 
 	if username == v.WebServer.setting.Username && password == v.WebServer.setting.Password {
 
@@ -247,11 +268,12 @@ func (v *View) Login(ctx *iris.Context) {
 
 		// Sign and get the complete encoded token as a string using the secret
 		if tokenString, err := token.SignedString([]byte(v.WebServer.setting.SecretKey)); err == nil {
-			ctx.JSON(iris.StatusOK, iris.Map{"code": 0, "token": tokenString})
+			context.Logger.INFO.Printf("user: %s logined", username)
+			v.sendJson(ctx, iris.Map{"token": tokenString})
 		} else {
-			ctx.JSON(iris.StatusOK, iris.Map{"code": 500, "msg": err.Error()})
+			v.sendJsonForError(ctx, 500, err.Error())
 		}
 	} else {
-		ctx.JSON(iris.StatusOK, iris.Map{"result": 403, "msg": "username or password incorrect"})
+		v.sendJsonForError(ctx, 403, "username or password incorrect")
 	}
 }

@@ -1,7 +1,9 @@
 [flags]
 store = "mysql"
 verbose = true
-
+http_port = 1520
+# 5m/5s
+Interval = "5m"
 
 [web]
 username = "admin"

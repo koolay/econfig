@@ -33,7 +33,7 @@ var syncCmd = &cobra.Command{
 		cfg := &app.GeneratorConfig{}
 		if gen, err := app.NewGenerator(cfg); err == nil {
 			fmt.Println("sync process")
-			gen.Sync()
+			gen.Sync(nil)
 		} else {
 			context.Logger.FATAL.Panic(err)
 		}

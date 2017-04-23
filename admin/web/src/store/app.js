@@ -18,6 +18,13 @@ export default {
         http.get(apiUrl, data => {
             successCb(data)
         })
+    },
+
+    execSync: function (appName, successCb, errorCb) {
+        const apiUrl = `/api/app/${appName}/sync`
+        http.post(apiUrl, { app: appName }, data => {
+            successCb(data)
+        })
     }
 
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -24,6 +25,19 @@ type App struct {
 	Dest        string // .env
 	Cmd         string // Cmd "nginx -s reload"
 	Owner       string // who owner the dist file
+}
+
+type WebOptions struct {
+	Account  string
+	Password string
+}
+
+// FlagOptions flags from config file. It'll override flags from command.
+type FlagOptions struct {
+	Backend  string
+	Verbose  bool
+	Interval time.Duration
+	HttpPort int
 }
 
 func (app *App) GetTmplPath() string {
@@ -64,6 +78,18 @@ func GetBackends(backend string) (map[string]interface{}, error) {
 		}
 	}
 	return nil, errors.New("not found configuration of the backend:" + backend)
+}
+
+func GetWebOptions() *WebOptions {
+	options := viper.GetStringMap("web")
+	webOptions := &WebOptions{}
+	webOptions.Account = ValueOfMap("account", options, "admin")
+	webOptions.Password = ValueOfMap("password", options, "123")
+	return webOptions
+}
+
+func GetFlagOptions() *FlagOptions {
+	return &FlagOptions{}
 }
 
 func GetApp(name string) *App {

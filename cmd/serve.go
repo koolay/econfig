@@ -24,7 +24,6 @@ import (
 	"github.com/koolay/econfig/config"
 	"github.com/koolay/econfig/context"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -38,8 +37,7 @@ var ServeCmd = &cobra.Command{
 	Long:  `Run as a serve`,
 	Run: func(cmd *cobra.Command, args []string) {
 		context.Logger = config.NewLogger(context.Flags.Global)
-		context.Logger.INFO.Println(viper.Get("apps.myapp"))
-		context.Logger.INFO.Println("serve called")
+		context.Logger.INFO.Println("serve start ...")
 
 		serveCfg := &app.ServeConfig{}
 		serveCfg.Bind = serveFlag.Bind
@@ -68,7 +66,8 @@ var ServeCmd = &cobra.Command{
 			context.Logger.FATAL.Panic(err)
 		}
 
-		webConfig := admin.Setting{Port: serveCfg.HttpPort, Username: "", Password: "", SecretKey: "$2@!!"}
+		webOptions := config.GetWebOptions()
+		webConfig := admin.Setting{Port: serveCfg.HttpPort, Username: webOptions.Account, Password: webOptions.Password, SecretKey: "$2@!!"}
 		ws := admin.New(webConfig)
 		go func() {
 			context.Logger.INFO.Printf("Start web server, listen: %d\n", serveCfg.HttpPort)

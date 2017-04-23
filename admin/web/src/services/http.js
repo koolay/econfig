@@ -8,7 +8,7 @@ export default {
     request (method, url, data, successCb = null, errorCb = null) {
         return Vue.http[method](url, data).then(response => {
             successCb(response.body)
-        }, error => {
+        }, (error) => {
             if (errorCb) {
                 errorCb(error)
             } else {

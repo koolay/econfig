@@ -15,7 +15,7 @@ import 'nprogress/nprogress.css'
 Vue.config.productionTip = false
 Vue.use(Resource)
 Vue.use(iView)
-
+Vue.http.options.emulateJSON = true
 Vue.http.interceptors.push((request, next) => {
     const token = ls.get('token')
     if (token) {

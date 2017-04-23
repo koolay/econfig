@@ -25,6 +25,13 @@ export default {
         http.get(apiUrl, data => {
             successCb(data)
         })
+    },
+
+    saveItem: function (appName, key, value, successCb, errorCb) {
+        const apiUrl = `/api/app/${appName}/item`
+        http.put(apiUrl, { app: appName, key, value }, data => {
+            successCb(data)
+        })
     }
 
 }

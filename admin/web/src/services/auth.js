@@ -1,55 +1,41 @@
 
 import http from './http'
+import ls from './ls'
 
 export default {
-    login (username, password, cb) {
-        cb = arguments[arguments.length - 1]
-        if (localStorage.token) {
-            if (cb) cb(true)
-            this.onChange(true)
-            return
-        }
-        pretendRequest(username, password, (res) => {
-            if (res.authenticated) {
-                localStorage.token = res.token
-                if (cb) cb(true)
+    login (account, password, cb) {
+        http.post('/api/login', {
+            'account': account,
+            'password': password,
+            'captcha': ''
+        }, response => {
+            if (response.code === 0) {
+                ls.set('token', response.data.token)
                 this.onChange(true)
+                return cb({
+                    code: response.code,
+                    token: response.data.token
+                })
             } else {
-                if (cb) cb(false)
-                this.onChange(false)
+                return cb({ code: response.code, msg: response.msg })
             }
         })
     },
 
     getToken () {
-        return localStorage.token
+        return ls.get('token')
     },
 
     logout (cb) {
-        delete localStorage.token
-        if (cb) cb()
+        ls.remove('token')
         this.onChange(false)
+        if (cb) cb()
     },
 
     loggedIn () {
-        return !!localStorage.token
+        return ls.get('token')
     },
 
-    onChange () {}
-}
+    onChange (loggedIn) {}
 
-function pretendRequest (username, password, cb) {
-    http.post('/api/login', {
-        'username': username,
-        'password': password
-    }, function (response) {
-        if (response.data.result) {
-            cb({
-                authenticated: true,
-                token: response.data.token
-            })
-        } else {
-            cb({ authenticated: false })
-        }
-    })
 }

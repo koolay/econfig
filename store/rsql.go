@@ -2,6 +2,7 @@ package store
 
 import (
 	"errors"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocraft/dbr"
 	"github.com/koolay/econfig/context"
@@ -65,9 +66,18 @@ func (rs *rsqlStorage) SetItem(key string, value interface{}) error {
 		defer conn.Close()
 		if err := conn.Select("count(*)").From(tableName).Where("key=?", key).LoadValue(&exits); err == nil {
 			if exits > 0 {
-				conn.Update(tableName).Where("key=?", key).Set("value", value.(string))
+				sqlResult, err := conn.Update(tableName).Where("key=?", key).Set("value", value.(string)).Exec()
+				if err == nil {
+					affected, err := sqlResult.RowsAffected()
+					if err == nil {
+						if affected == 0 {
+							return errors.New("no affected rows")
+						}
+					}
+				}
+				return err
 			} else {
-				conn.InsertInto(tableName).Columns("key", "value").Values(key, value)
+				_, err = conn.InsertInto(tableName).Columns("key", "value").Values(key, value).Exec()
 			}
 			return nil
 		} else {

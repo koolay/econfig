@@ -23,30 +23,59 @@ type Generator struct {
 	wg     sync.WaitGroup
 }
 
+type AppGenerateResult struct {
+	sync.Mutex
+	Logs    []string
+	Success bool
+}
+
+type GenerateResult struct {
+	AppsMap map[string]*AppGenerateResult
+}
+
+func (gr *AppGenerateResult) pushLog(logLevel, text string) {
+	defer gr.Unlock()
+	gr.Lock()
+	gr.Logs = append(gr.Logs, fmt.Sprintf("[%s] %s", logLevel, text))
+	if logLevel == "info" {
+		context.Logger.INFO.Println(text)
+	} else if logLevel == "error" {
+		context.Logger.ERROR.Println(text)
+	} else if logLevel == "fatal" {
+		context.Logger.FATAL.Fatalln(text)
+	}
+}
+
 func NewGenerator(config *GeneratorConfig) (*Generator, error) {
 	gen := &Generator{}
 	gen.config = config
 	return gen, nil
 }
 
-func (gen *Generator) Sync() {
+func (gen *Generator) Sync(appList []*config.App) (*GenerateResult, error) {
 	gen.mu.Lock()
 	defer gen.mu.Unlock()
-	appList := config.GetApps()
+	if appList == nil || len(appList) == 0 {
+		appList = config.GetApps()
+	}
+	gr := &GenerateResult{}
 	for _, app := range appList {
-		context.Logger.INFO.Printf("sync app: %s \n", app.Name)
 		gen.wg.Add(1)
+		appGr := &AppGenerateResult{Success: true}
+		gr.AppsMap = make(map[string]*AppGenerateResult)
+		gr.AppsMap[app.Name] = appGr
+		appGr.pushLog("info", fmt.Sprintf("sync app: %s \n", app.Name))
 		go func(app *config.App) {
 			defer func() {
 				gen.wg.Done()
-				context.Logger.INFO.Printf("sync app: %s completed \n", app.Name)
+				appGr.pushLog("info", fmt.Sprintf("sync app: %s completed \n", app.Name))
 			}()
-			context.Logger.INFO.Println("start sync app:", app.Name)
+			appGr.pushLog("info", fmt.Sprintf("start sync app: %s \n", app.Name))
 			tmplFilePath := app.GetTmplPath()
 			destFilePath := app.GetDestPath()
 			// load apps
-			context.Logger.INFO.Printf("sync app: %s, tmpfile: %s \n", app.Name, tmplFilePath)
-			context.Logger.INFO.Printf("sync app: %s, destfile: %s \n", app.Name, destFilePath)
+			appGr.pushLog("info", fmt.Sprintf("sync app: %s, tmpfile: %s \n", app.Name, tmplFilePath))
+			appGr.pushLog("info", fmt.Sprintf("sync app: %s, destfile: %s \n", app.Name, destFilePath))
 			if tmplMap, err := dotfile.ReadEnvFile(tmplFilePath); err == nil {
 				var keys []string
 				var originalKeys sort.StringSlice
@@ -57,7 +86,8 @@ func (gen *Generator) Sync() {
 				originalKeys.Sort()
 				storage, err := store.NewStorage(context.Flags.Global.Backend)
 				if err != nil {
-					context.Logger.ERROR.Println(err.Error())
+					appGr.pushLog("error", err.Error())
+					appGr.Success = false
 					return
 				}
 				if valueMap, err := storage.GetItems(keys); err == nil {
@@ -73,26 +103,33 @@ func (gen *Generator) Sync() {
 						if val, ok := valueMap[storeKey]; ok {
 							lines = append(lines, fmt.Sprintf("%s=%v", k, val))
 						} else {
-							context.Logger.WARN.Printf("[%s]miss key: %s \n", app.Name, k)
-							// lines = append(lines, fmt.Sprintf("%s=%v", k, tmpItem.Value))
+							appGr.Success = false
+							appGr.pushLog("error", fmt.Sprintf("[%s]miss key: %s \n", app.Name, k))
 						}
 					}
 
-					if err := dotfile.WriteLines(lines, destFilePath, 0, 0); err != nil {
-						context.Logger.ERROR.Printf("failed to write to %s. error: %s", destFilePath, err.Error())
+					if appGr.Success {
+						appGr.pushLog("info", fmt.Sprintf("sync to dest file %s", destFilePath))
+						if err := dotfile.WriteLines(lines, destFilePath, 0, 0); err != nil {
+							appGr.Success = false
+							appGr.pushLog("error", fmt.Sprintf("failed to write to %s. error: %s", destFilePath, err.Error()))
+						}
 					}
 
 				} else {
-					context.Logger.ERROR.Printf("fetch data failed. %v", err)
+					appGr.Success = false
+					appGr.pushLog("error", fmt.Sprintf("fetch data failed. %v", err))
 				}
 			} else {
-				context.Logger.ERROR.Printf("errmsg: %s. parse file: %s failed.", err.Error(), tmplFilePath)
+				appGr.Success = false
+				appGr.pushLog("error", fmt.Sprintf("errmsg: %s. parse file: %s failed.", err.Error(), tmplFilePath))
 			}
 		}(app)
 
 	}
 	gen.wg.Wait()
-	context.Logger.INFO.Println("complete")
+	context.Logger.INFO.Println("info", "complete")
+	return gr, nil
 }
 
 func (gen *Generator) SyncLoop() {
@@ -101,6 +138,6 @@ func (gen *Generator) SyncLoop() {
 	for {
 		<-t.C
 		context.Logger.INFO.Println("syncLoop called")
-		gen.Sync()
+		gen.Sync(nil)
 	}
 }
