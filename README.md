@@ -40,11 +40,11 @@ EConfig
 
 ## 截图(Screenshot)
 
-![Alt text](/screenshot/econfig01.png?raw=true"Optional Title")
+![Alt text](/screenshot/econfig01.png?raw=true)
 
-![Alt text](/screenshot/econfig02.png?raw=true"Optional Title")
+![Alt text](/screenshot/econfig02.png?raw=true)
 
-![Alt text](/screenshot/econfig03.png?raw=true"Optional Title")
+![Alt text](/screenshot/econfig03.png?raw=true)
 
 
 ## Thanks
