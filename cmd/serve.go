@@ -18,6 +18,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/koolay/econfig/admin"
 	"github.com/koolay/econfig/app"
@@ -38,6 +39,24 @@ var ServeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		context.Logger = config.NewLogger(context.Flags.Global)
 		context.Logger.INFO.Println("serve start ...")
+
+		// use .econfig.toml to override command flags
+		flagsMap := config.GetFlagOptions()
+		if httpPort, ok := flagsMap["http-port"]; ok {
+			serveFlag.HttpPort = int(httpPort.(int64))
+		}
+
+		if rpcAddr, ok := flagsMap["rpc-addr"]; ok {
+			serveFlag.RPCAddr = rpcAddr.(string)
+		}
+
+		if interval, ok := flagsMap["interval"]; ok {
+			intervalTmp, err := time.ParseDuration(interval.(string))
+			if err != nil {
+				context.Logger.FATAL.Fatalf("invalid configuration item 'interval' %v", interval)
+			}
+			serveFlag.Interval = intervalTmp
+		}
 
 		serveCfg := &app.ServeConfig{}
 		serveCfg.Bind = serveFlag.Bind

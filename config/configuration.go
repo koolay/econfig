@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -30,14 +29,6 @@ type App struct {
 type WebOptions struct {
 	Account  string
 	Password string
-}
-
-// FlagOptions flags from config file. It'll override flags from command.
-type FlagOptions struct {
-	Backend  string
-	Verbose  bool
-	Interval time.Duration
-	HttpPort int
 }
 
 func (app *App) GetTmplPath() string {
@@ -88,8 +79,8 @@ func GetWebOptions() *WebOptions {
 	return webOptions
 }
 
-func GetFlagOptions() *FlagOptions {
-	return &FlagOptions{}
+func GetFlagOptions() map[string]interface{} {
+	return viper.GetStringMap("flag")
 }
 
 func GetApp(name string) *App {
