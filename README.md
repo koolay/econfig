@@ -1,7 +1,9 @@
 EConfig
 ---------
 
-令人愉悦的自带UI的配置管理工具, 灵感来自于[confd](https://github.com/kelseyhightower/confd)
+令人愉悦的自带UI的配置管理工具, 灵感来自于[confd](https://github.com/kelseyhightower/confd).
+
+**.env.example** + **backend(redis/mysql/postgres/etcd/consul)** = **.env**
 
 ## 目标(Features)
 
@@ -37,6 +39,8 @@ EConfig
 
 ## Thanks
 
-[iris](https://github.com/kataras/iris)
-[vue](https://vuejs.org)
-[iviewui](https://www.iviewui.com)
+- [iris](https://github.com/kataras/iris)
+
+- [vue](https://vuejs.org)
+
+- [iviewui](https://www.iviewui.com)
