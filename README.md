@@ -26,6 +26,21 @@ EConfig
 ## 部署(Setup)
 
 
+### 编译安装(Intall)
+
+**准备环境**
+
+- 安装npm
+
+- 安装go-binddata工具: `go get -u github.com/jteeuwen/go-bindata/...`
+
+
+1. `cd econfig/admin/web`
+2. `npm install && npm run build`
+3. `cd econfig/admin && go-bindata -pkg admin web/dist/...`
+4. `cd econfig && go build .`
+
+
 ## 运行(Run)
 
 - 以服务的方式运行(Run as serve)
