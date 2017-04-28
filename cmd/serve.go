@@ -93,10 +93,10 @@ var ServeCmd = &cobra.Command{
 			ws.Start()
 		}()
 
-		c := app.NewSerfClient(serveCfg)
-		if err := c.StartCluster(); err != nil {
-			context.Logger.FATAL.Fatal(err)
-		}
+		// c := app.NewSerfClient(serveCfg)
+		// if err := c.StartCluster(); err != nil {
+		//	context.Logger.FATAL.Fatal(err)
+		// }
 
 		// rpcClient, err := app.NewRPCClient(serveCfg.RPCAddr, serveCfg.RPCAuth)
 		// if err != nil {
