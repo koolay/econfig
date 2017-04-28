@@ -14,19 +14,14 @@
 
 package main
 
-import (
-	// "flag"
-	// "strings"
+import
+// "flag"
+// "strings"
 
-	"github.com/koolay/econfig/cmd"
-	"github.com/koolay/econfig/config"
-	"github.com/koolay/econfig/context"
-	// "github.com/spf13/pflag"
-)
+"github.com/koolay/econfig/cmd"
+
+// "github.com/spf13/pflag"
 
 func main() {
-	context.Flags.Global = config.NewGlobalFlag(cmd.EConfigCmd.PersistentFlags())
-	config.LoadConfig(context.Flags.Global)
-	context.Logger = config.NewLogger(context.Flags.Global)
 	cmd.Execute()
 }
