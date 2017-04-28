@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -134,7 +133,6 @@ var ServeCmd = &cobra.Command{
 }
 
 func init() {
-	fmt.Println("serve init")
 	EConfigCmd.AddCommand(ServeCmd)
 	serveFlag = config.NewServeFlag(ServeCmd.Flags())
 }
