@@ -117,15 +117,14 @@ func GetApps() []*App {
 
 func LoadConfig(gf *GlobalFlag) {
 	viper.SetConfigType("toml")
-	if gf.CfgFile != "" {
-		viper.SetConfigFile(gf.CfgFile)
-	}
-
 	viper.SetConfigName(".econfig") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")    // adding home directory as first search path
 	viper.AddConfigPath(".")
 	viper.AutomaticEnv() // read in environment variables that match
 	viper.WatchConfig()
+	if gf.CfgFile != "" {
+		viper.SetConfigFile(gf.CfgFile)
+	}
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("Config file changed:", e.Name)
 	})

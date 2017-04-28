@@ -16,8 +16,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/koolay/econfig/config"
+	"github.com/koolay/econfig/context"
+	"github.com/spf13/cobra"
+)
+
+var (
+	gf *config.GlobalFlag
 )
 
 // EConfigCmd represents the base command when called without any subcommands
@@ -29,7 +36,9 @@ var EConfigCmd = &cobra.Command{
 	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("root run")
+	},
 }
 
 func Execute() {
@@ -41,9 +50,24 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(preInit)
+	initRootPersistenFlags()
 }
 
 // initConfig reads in config file and ENV variables if set.
 func preInit() {
+	initConfig()
+}
 
+func initRootPersistenFlags() {
+	gf = &config.GlobalFlag{}
+	EConfigCmd.PersistentFlags().StringVar(&gf.LogFile, "logfile", "", "output log to the logfile. By default output to stdout")
+	EConfigCmd.PersistentFlags().StringVarP(&gf.CfgFile, "config", "c", "", "config file")
+	EConfigCmd.PersistentFlags().StringVar(&gf.Backend, "backend", "redis", "Backend storage to use, redis, mysql, postgres, etcd, consul.")
+	EConfigCmd.PersistentFlags().StringVar(&gf.App, "app", "", "command work only this app")
+	EConfigCmd.PersistentFlags().BoolVarP(&gf.Verbose, "verbose", "v", false, "if ouput detail log")
+}
+func initConfig() {
+	context.Flags.Global = gf
+	config.LoadConfig(gf)
+	context.Logger = config.NewLogger(context.Flags.Global)
 }

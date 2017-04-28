@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -37,7 +38,6 @@ var ServeCmd = &cobra.Command{
 	Short: "Run as a serve",
 	Long:  `Run as a serve`,
 	Run: func(cmd *cobra.Command, args []string) {
-		context.Logger = config.NewLogger(context.Flags.Global)
 		context.Logger.INFO.Println("serve start ...")
 
 		// use .econfig.toml to override command flags
@@ -134,6 +134,7 @@ var ServeCmd = &cobra.Command{
 }
 
 func init() {
+	fmt.Println("serve init")
 	EConfigCmd.AddCommand(ServeCmd)
 	serveFlag = config.NewServeFlag(ServeCmd.Flags())
 }
