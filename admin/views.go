@@ -173,11 +173,9 @@ func (v *View) AllItems(ctx *iris.Context) {
 
 	items, err := dotfile.ReadEnvFile(app.GetDestPath())
 	if err != nil {
-		v.sendJsonForError(ctx, 500, err.Error())
-		return
+		v.sendJson(ctx, []interface{}{})
 	} else {
 		v.sendJson(ctx, items)
-		return
 	}
 }
 
